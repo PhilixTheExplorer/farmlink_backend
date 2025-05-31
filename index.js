@@ -3,6 +3,11 @@ import cors from 'cors';
 import helmet from 'helmet';
 import dotenv from 'dotenv';
 import { createClient } from '@supabase/supabase-js';
+import usersRouter from './routes/users.js';
+import farmersRouter from './routes/farmers.js';
+import buyersRouter from './routes/buyers.js';
+import productsRouter from './routes/products.js';
+import dashboardRouter from './routes/dashboard.js';
 import { rateLimit } from './middleware/validation.js';
 
 // Load environment variables
@@ -96,6 +101,13 @@ app.get('/api/test-db', async (req, res) => {
         });
     }
 });
+
+// API Routes
+app.use('/api/users', usersRouter);
+app.use('/api/farmers', farmersRouter);
+app.use('/api/buyers', buyersRouter);
+app.use('/api/products', productsRouter);
+app.use('/api', dashboardRouter);
 
 // API info endpoint
 app.get('/api', (req, res) => {
