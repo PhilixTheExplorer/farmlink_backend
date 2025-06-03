@@ -2,7 +2,7 @@ import express from 'express';
 import { supabase } from '../config/database.js';
 import { validateUUID, validatePagination } from '../middleware/validation.js';
 import { authenticateToken, authorizeRole, authorizeFarmerProduct } from '../middleware/auth.js';
-import {checkDbConfig} from '../middleware/check_db_config.js';
+import { checkDbConfig } from '../middleware/check_db_config.js';
 
 const router = express.Router();
 
@@ -59,19 +59,19 @@ router.get('/', validatePagination, async (req, res) => {
             max_price = ''
         } = req.query;
 
-        const offset = (page - 1) * limit;
-
-        let query = supabase
+        const offset = (page - 1) * limit; let query = supabase
             .from('products').select(`
                 *,
-                farmers:farmer_id (
-                    farm_name,
-                    farm_address,
-                    is_verified,
-                    users!farmers_user_id_fkey (
-                        name,
-                        location,
-                        profile_image_url
+                farmer_user:farmer_id (
+                    id,
+                    name,
+                    email,
+                    location,
+                    profile_image_url,
+                    farmers (
+                        farm_name,
+                        farm_address,
+                        is_verified
                     )
                 )
             `, { count: 'exact' })
@@ -134,21 +134,20 @@ router.get('/', validatePagination, async (req, res) => {
 // GET product by ID with farmer information
 router.get('/:id', validateUUID, async (req, res) => {
     try {
-        const { id } = req.params;
-
-        const { data, error } = await supabase
+        const { id } = req.params; const { data, error } = await supabase
             .from('products').select(`
                 *,
-                farmers:farmer_id (
-                    farm_name,
-                    farm_address,
-                    is_verified,
-                    users!farmers_user_id_fkey (
-                        name,
-                        email,
-                        phone,
-                        location,
-                        profile_image_url
+                farmer_user:farmer_id (
+                    id,
+                    name,
+                    email,
+                    phone,
+                    location,
+                    profile_image_url,
+                    farmers (
+                        farm_name,
+                        farm_address,
+                        is_verified
                     )
                 )
             `)
@@ -226,17 +225,17 @@ router.get('/category/:category', validatePagination, async (req, res) => {
     try {
         const { category } = req.params;
         const { page = 1, limit = 10, status = 'available' } = req.query;
-        const offset = (page - 1) * limit;
-
-        let query = supabase
+        const offset = (page - 1) * limit; let query = supabase
             .from('products')
             .select(`
                 *,
-                farmers:farmer_id (                    farm_name,
-                    is_verified,
-                    users!farmers_user_id_fkey (
-                        name,
-                        location
+                farmer_user:farmer_id (
+                    id,
+                    name,
+                    location,
+                    farmers (
+                        farm_name,
+                        is_verified
                     )
                 )
             `, { count: 'exact' })
@@ -546,17 +545,17 @@ router.get('/meta/units', async (req, res) => {
 // GET featured products (top rated or most ordered)
 router.get('/featured/popular', validatePagination, async (req, res) => {
     try {
-        const { limit = 10 } = req.query;
-
-        const { data, error } = await supabase
+        const { limit = 10 } = req.query; const { data, error } = await supabase
             .from('products')
             .select(`
                 *,
-                farmers:farmer_id (
-                    farm_name,                    is_verified,
-                    users!farmers_user_id_fkey (
-                        name,
-                        location
+                farmer_user:farmer_id (
+                    id,
+                    name,
+                    location,
+                    farmers (
+                        farm_name,
+                        is_verified
                     )
                 )
             `)

@@ -92,7 +92,7 @@ app.get('/api/db-status', async (req, res) => {
         }
 
         // Test core tables
-        const tables = ['users', 'farmer_profiles', 'buyer_profiles', 'products', 'orders'];
+        const tables = ['users', 'farmers', 'buyers', 'products', 'orders'];
         const tableTests = {};
 
         for (const table of tables) {

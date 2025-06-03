@@ -40,8 +40,7 @@ router.get('/', authenticateToken, authorizeRole('buyer'), async (req, res) => {
         const { data, error } = await supabase
             .from('cart_items')
             .select(`
-                *,
-                products:product_id (
+                *,                products:product_id (
                     id,
                     title,
                     description,
@@ -51,12 +50,12 @@ router.get('/', authenticateToken, authorizeRole('buyer'), async (req, res) => {
                     image_url,
                     status,
                     quantity as available_quantity,
-                    farmers:farmer_id (
-                        farm_name,
-                        is_verified,
-                        users!farmers_user_id_fkey (
-                            name,
-                            location
+                    farmer_user:farmer_id (
+                        name,
+                        location,
+                        farmers (
+                            farm_name,
+                            is_verified
                         )
                     )
                 )
