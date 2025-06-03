@@ -80,6 +80,22 @@ router.get('/dashboard', async (req, res) => {
                     'GET /products/featured/popular': 'Get popular/featured products',
                     'POST /products/seed': 'Seed database with sample products'
                 },
+                cart: {
+                    'GET /cart': 'Get current user\'s cart items with totals',
+                    'POST /cart/items': 'Add item to cart',
+                    'PUT /cart/items/:itemId': 'Update cart item quantity',
+                    'DELETE /cart/items/:itemId': 'Remove item from cart',
+                    'DELETE /cart/clear': 'Clear entire cart',
+                    'GET /cart/summary': 'Get cart summary (item count and total)'
+                },
+                orders: {
+                    'GET /orders': 'Get orders (buyers see their orders, farmers see orders with their products)',
+                    'GET /orders/:orderId': 'Get specific order by ID',
+                    'POST /orders/checkout': 'Create order from cart (checkout process)',
+                    'PATCH /orders/:orderId/status': 'Update order status (farmers/admins)',
+                    'PATCH /orders/:orderId/payment': 'Update payment status (admins)',
+                    'GET /orders/stats/summary': 'Get order statistics for current user'
+                },
                 system: {
                     'GET /health': 'Server health check',
                     'GET /test-db': 'Database connection test',
@@ -137,10 +153,42 @@ router.get('/dashboard', async (req, res) => {
                     category: 'rice | fruits | vegetables | herbs | handmade | dairy | meat | other',
                     quantity: 'integer',
                     unit: 'kg | g | pcs | pack | bag | box | bottle | bunch | dozen',
-                    image_url: 'string (optional)',
-                    status: 'available | outOfStock | discontinued',
+                    image_url: 'string (optional)', status: 'available | outOfStock | discontinued',
                     is_organic: 'boolean',
                     order_count: 'integer'
+                },
+                cart_item: {
+                    id: 'UUID',
+                    buyer_id: 'UUID (references users.id)',
+                    product_id: 'UUID (references products.id)',
+                    quantity: 'integer',
+                    created_at: 'timestamp',
+                    updated_at: 'timestamp'
+                },
+                order: {
+                    id: 'UUID',
+                    buyer_id: 'UUID (references users.id)',
+                    order_number: 'string (unique)',
+                    total_amount: 'decimal',
+                    delivery_address: 'string',
+                    payment_method: 'cash_on_delivery | bank_transfer | gcash | paypal',
+                    payment_status: 'pending | completed | failed | refunded',
+                    status: 'pending | confirmed | preparing | ready_for_pickup | out_for_delivery | delivered | cancelled',
+                    notes: 'string (optional)',
+                    created_at: 'timestamp',
+                    updated_at: 'timestamp',
+                    confirmed_at: 'timestamp (optional)',
+                    delivered_at: 'timestamp (optional)',
+                    cancelled_at: 'timestamp (optional)'
+                },
+                order_item: {
+                    id: 'UUID',
+                    order_id: 'UUID (references orders.id)',
+                    product_id: 'UUID (references products.id)',
+                    quantity: 'integer',
+                    unit_price: 'decimal',
+                    subtotal: 'decimal',
+                    created_at: 'timestamp'
                 }
             },
             authentication: {

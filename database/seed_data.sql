@@ -1,0 +1,27 @@
+-- ============================================================================
+-- FARM LINK SEED DATA
+-- 
+-- NOTICE: This file has been reorganized!
+-- 
+-- The seed data has been moved to separate files in the /seed directory:
+-- - users_seed.sql - User accounts (farmers and buyers)
+-- - farmer_profiles_seed.sql - Farmer profile information
+-- - buyer_profiles_seed.sql - Buyer profile information
+-- - products_seed.sql - Product catalog
+-- - cart_items_seed.sql - Sample cart items
+-- - orders_seed.sql - Sample orders and order items
+-- - final_updates_seed.sql - Statistics updates
+-- - master_seed.sql - Executes all seeds in correct order
+--
+-- To seed the database, use one of these options:
+--
+-- Option 1: Execute all seeds at once
+-- psql -d your_database_name -f database/seed/master_seed.sql
+--
+-- Option 2: Use the JavaScript seeding system
+-- node database/seed/seedCli.js --all
+--
+-- See database/seed/README.md for detailed instructions.
+-- ============================================================================
+
+
