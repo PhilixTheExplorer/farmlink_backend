@@ -129,7 +129,6 @@ router.get('/dashboard', async (req, res) => {
                     location: 'string (optional)',
                     role: 'farmer | buyer',
                     profile_image_url: 'string (optional)',
-                    join_date: 'timestamp'
                 },
                 farmer: {
                     user_id: 'UUID (references users.id)',
