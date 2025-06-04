@@ -156,7 +156,6 @@ Content-Type: application/json
       "phone": "+1-555-0123",
       "location": "San Francisco, CA",
       "role": "customer",
-      "join_date": "2025-05-29T12:00:00.000Z"
     },
     "token": "jwt-token-here"
   }
@@ -182,7 +181,6 @@ GET /api/users?page=1&limit=10&role=customer
       "phone": "+1-555-0123",
       "location": "San Francisco, CA",
       "role": "customer",
-      "join_date": "2025-05-29T12:00:00.000Z"
     }
   ],
   "pagination": {

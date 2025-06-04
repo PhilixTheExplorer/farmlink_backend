@@ -22,8 +22,7 @@ router.get('/', validatePagination, async (req, res) => {
                     name,
                     phone,
                     location,
-                    profile_image_url,
-                    join_date
+                    profile_image_url
                 )
             `, { count: 'exact' })
             .order('created_at', { ascending: false })
@@ -93,8 +92,7 @@ router.get('/:id', validateUUID, async (req, res) => {
                     name,
                     phone,
                     location,
-                    profile_image_url,
-                    join_date
+                    profile_image_url
                 )
             `)
             .eq('user_id', id)
@@ -137,8 +135,7 @@ router.get('/user/:userId', validateUUID, async (req, res) => {
                     name,
                     phone,
                     location,
-                    profile_image_url,
-                    join_date
+                    profile_image_url
                 )
             `)
             .eq('user_id', userId)

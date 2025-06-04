@@ -95,7 +95,7 @@ router.post('/register', validateRegisterData, async (req, res) => {
                 password_hash,
                 role,
             }])
-            .select('id, email, role, join_date')
+            .select('id, email, role')
             .single();
 
         if (userError) throw userError;
@@ -165,7 +165,7 @@ router.post('/login', validateLoginData, async (req, res) => {
         // Find user by email
         const { data: user, error } = await supabase
             .from('users')
-            .select('id, email, password_hash, name, phone, location, role, profile_image_url, join_date')
+            .select('id, email, password_hash, name, phone, location, role, profile_image_url')
             .eq('email', email)
             .single();
 
@@ -247,7 +247,6 @@ router.get('/', authenticateToken, authorizeRole('admin'), validatePagination, a
         let query = supabase
             .from('users')
             .select('*', { count: 'exact' })
-            .order('join_date', { ascending: false })
             .range(offset, offset + limit - 1);
 
         // Add search functionality
@@ -325,8 +324,7 @@ router.get('/role/:role', authenticateToken, authorizeRole('admin'), async (req,
         const { data, error } = await supabase
             .from('users')
             .select('*')
-            .eq('role', role)
-            .order('join_date', { ascending: false });
+            .eq('role', role);
 
         if (error) throw error;
 
@@ -350,7 +348,6 @@ router.post('/', authenticateToken, authorizeRole('admin'), validateUserData, as
     try {
         const userData = {
             ...req.body,
-            join_date: new Date().toISOString(),
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString()
         };
@@ -389,7 +386,6 @@ router.put('/:id', authenticateToken, authorizeOwnerOrAdmin, validateUUID, async
 
         // Remove fields that shouldn't be updated
         delete updateData.id;
-        delete updateData.join_date;
         delete updateData.created_at;
 
         const { data, error } = await supabase
