@@ -114,7 +114,6 @@ router.get('/dashboard', async (req, res) => {
                     status: 'Filter by status',
                     role: 'Filter by user role',
                     verified: 'Filter by verification status (true/false)',
-                    is_organic: 'Filter organic products (true/false)',
                     min_price: 'Minimum price filter',
                     max_price: 'Maximum price filter',
                     farmer_id: 'Filter products by farmer ID'
@@ -153,7 +152,6 @@ router.get('/dashboard', async (req, res) => {
                     quantity: 'integer',
                     unit: 'kg | g | pcs | pack | bag | box | bottle | bunch | dozen',
                     image_url: 'string (optional)', status: 'available | outOfStock | discontinued',
-                    is_organic: 'boolean',
                     order_count: 'integer'
                 },
                 cart_item: {

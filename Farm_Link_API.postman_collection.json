@@ -664,11 +664,6 @@
                                     "disabled": true
                                 },
                                 {
-                                    "key": "is_organic",
-                                    "value": "",
-                                    "disabled": true
-                                },
-                                {
                                     "key": "min_price",
                                     "value": "",
                                     "disabled": true
@@ -750,7 +745,7 @@
                         ],
                         "body": {
                             "mode": "raw",
-                            "raw": "{\n  \"farmer_id\": \"{{farmerId}}\",\n  \"title\": \"Fresh Organic Tomatoes\",\n  \"description\": \"Delicious organic tomatoes grown with care\",\n  \"price\": 45.00,\n  \"category\": \"vegetables\",\n  \"quantity\": 100,\n  \"unit\": \"kg\",\n  \"image_url\": \"https://example.com/tomato.jpg\",\n  \"status\": \"available\",\n  \"is_organic\": true\n}"
+                            "raw": "{\n  \"farmer_id\": \"{{farmerId}}\",\n  \"title\": \"Fresh Organic Tomatoes\",\n  \"description\": \"Delicious organic tomatoes grown with care\",\n  \"price\": 45.00,\n  \"category\": \"vegetables\",\n  \"quantity\": 100,\n  \"unit\": \"kg\",\n  \"image_url\": \"https://example.com/tomato.jpg\",\n  \"status\": \"available\",\n}"
                         },
                         "url": {
                             "raw": "{{baseUrl}}/api/products",
@@ -776,7 +771,7 @@
                         ],
                         "body": {
                             "mode": "raw",
-                            "raw": "{\n  \"title\": \"Updated Product Title\",\n  \"description\": \"Updated description\",\n  \"price\": 50.00,\n  \"category\": \"vegetables\",\n  \"quantity\": 80,\n  \"unit\": \"kg\",\n  \"is_organic\": true\n}"
+                            "raw": "{\n  \"title\": \"Updated Product Title\",\n  \"description\": \"Updated description\",\n  \"price\": 50.00,\n  \"category\": \"vegetables\",\n  \"quantity\": 80,\n  \"unit\": \"kg\",\n}"
                         },
                         "url": {
                             "raw": "{{baseUrl}}/api/products/{{productId}}",

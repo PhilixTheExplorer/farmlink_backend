@@ -197,7 +197,6 @@ The Farm Link backend now has a **complete, production-ready e-commerce foundati
 - **Email notifications** for order status updates
 - **Advanced inventory management** with low-stock alerts
 - **Discount/coupon system** for promotions
-- **Review and rating system** for products
 - **Analytics dashboard** for sales insights
 - **Multi-language support** for international markets
 

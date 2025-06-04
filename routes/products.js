@@ -54,7 +54,6 @@ router.get('/', validatePagination, async (req, res) => {
             category = '',
             status = '',
             farmer_id = '',
-            is_organic = '',
             min_price = '',
             max_price = ''
         } = req.query;
@@ -93,10 +92,6 @@ router.get('/', validatePagination, async (req, res) => {
 
         if (farmer_id) {
             query = query.eq('farmer_id', farmer_id);
-        }
-
-        if (is_organic !== '') {
-            query = query.eq('is_organic', is_organic === 'true');
         }
 
         if (min_price) {

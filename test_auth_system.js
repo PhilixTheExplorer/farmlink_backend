@@ -129,7 +129,6 @@ async function testProtectedEndpoints() {
             category: 'rice',
             quantity: 100,
             unit: 'kg',
-            is_organic: true
         };
 
         const createProductResponse = await authFetch(`${BASE_URL}/api/products`, {

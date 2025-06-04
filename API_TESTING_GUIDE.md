@@ -30,7 +30,6 @@ GET /products
 - `category` (string): Filter by category
 - `status` (string): Filter by status (available, outOfStock, discontinued)
 - `farmer_id` (UUID): Filter by farmer ID
-- `is_organic` (boolean): Filter organic products
 - `min_price` (number): Minimum price filter
 - `max_price` (number): Maximum price filter
 
@@ -96,7 +95,6 @@ Authorization: Bearer <farmer_token>
   "quantity": 50,
   "unit": "kg",
   "image_url": "https://example.com/apple.jpg",
-  "is_organic": true
 }
 ```
 
@@ -113,7 +111,6 @@ curl -X POST "http://localhost:3000/api/products" \
     "category": "fruits",
     "quantity": 50,
     "unit": "kg",
-    "is_organic": true
   }'
 ```
 
@@ -455,7 +452,6 @@ curl -X POST "http://localhost:3000/api/products" \
     "category": "fruits",
     "quantity": 100,
     "unit": "pcs",
-    "is_organic": true
   }'
 
 # Get all products
@@ -534,7 +530,6 @@ curl -X GET "http://localhost:3000/api/cart" \
       "quantity": 50,
       "unit": "kg",
       "status": "available",
-      "is_organic": true,
       "farmers": {
         "farm_name": "Green Valley Farm",
         "is_verified": true,
