@@ -35,12 +35,10 @@ const validateCartItemData = (req, res, next) => {
 // GET current user's cart items
 router.get('/', authenticateToken, authorizeRole('buyer'), async (req, res) => {
     try {
-        const { userId } = req.user;
-
-        const { data, error } = await supabase
+        const { userId } = req.user; const { data, error } = await supabase
             .from('cart_items')
             .select(`
-                *,                products:product_id (
+                *,  products:product_id (
                     id,
                     title,
                     description,
@@ -49,7 +47,7 @@ router.get('/', authenticateToken, authorizeRole('buyer'), async (req, res) => {
                     unit,
                     image_url,
                     status,
-                    quantity as available_quantity,
+                    quantity,
                     farmer_user:farmer_id (
                         name,
                         location,
@@ -100,12 +98,10 @@ router.get('/', authenticateToken, authorizeRole('buyer'), async (req, res) => {
 router.post('/items', authenticateToken, authorizeRole('buyer'), validateCartItemData, validateUUID, async (req, res) => {
     try {
         const { userId } = req.user;
-        const { product_id, quantity } = req.body;
-
-        // Check if product exists and is available
+        const { product_id, quantity } = req.body;        // Check if product exists and is available
         const { data: product, error: productError } = await supabase
             .from('products')
-            .select('id, title, price, quantity as available_quantity, status, farmer_id')
+            .select('id, title, price, quantity, status, farmer_id')
             .eq('id', product_id)
             .single();
 
@@ -124,12 +120,10 @@ router.post('/items', authenticateToken, authorizeRole('buyer'), validateCartIte
                 success: false,
                 message: 'Product is not available for purchase'
             });
-        }
-
-        if (product.available_quantity < quantity) {
+        } if (product.quantity < quantity) {
             return res.status(400).json({
                 success: false,
-                message: `Only ${product.available_quantity} items available in stock`
+                message: `Only ${product.quantity} items available in stock`
             });
         }
 
@@ -156,12 +150,10 @@ router.post('/items', authenticateToken, authorizeRole('buyer'), validateCartIte
         let cartItem;
         if (existingItem) {
             // Update existing item quantity
-            const newQuantity = existingItem.quantity + quantity;
-
-            if (newQuantity > product.available_quantity) {
+            const newQuantity = existingItem.quantity + quantity; if (newQuantity > product.quantity) {
                 return res.status(400).json({
                     success: false,
-                    message: `Cannot add ${quantity} more items. Only ${product.available_quantity - existingItem.quantity} more items can be added.`
+                    message: `Cannot add ${quantity} more items. Only ${product.quantity - existingItem.quantity} more items can be added.`
                 });
             }
 
@@ -226,12 +218,11 @@ router.put('/items/:itemId', authenticateToken, authorizeRole('buyer'), validate
 
         // Check if cart item exists and belongs to user
         const { data: cartItem, error: cartError } = await supabase
-            .from('cart_items')
-            .select(`
+            .from('cart_items').select(`
                 *,
                 products:product_id (
                     title,
-                    quantity as available_quantity,
+                    quantity,
                     status
                 )
             `)
@@ -254,12 +245,10 @@ router.put('/items/:itemId', authenticateToken, authorizeRole('buyer'), validate
                 success: false,
                 message: 'Product is no longer available'
             });
-        }
-
-        if (cartItem.products.available_quantity < quantity) {
+        } if (cartItem.products.quantity < quantity) {
             return res.status(400).json({
                 success: false,
-                message: `Only ${cartItem.products.available_quantity} items available in stock`
+                message: `Only ${cartItem.products.quantity} items available in stock`
             });
         }
 
