@@ -1,6 +1,5 @@
 import express from 'express';
 import { supabase } from '../config/database.js';
-import { validateUUID, validatePagination } from '../middleware/validation.js';
 import { authenticateToken, authorizeRole } from '../middleware/auth.js';
 import { checkDbConfig } from '../middleware/check_db_config.js';
 
@@ -35,7 +34,8 @@ const validateCartItemData = (req, res, next) => {
 // GET current user's cart items
 router.get('/', authenticateToken, authorizeRole('buyer'), async (req, res) => {
     try {
-        const { userId } = req.user; const { data, error } = await supabase
+        const { userId } = req.user;
+        const { data, error } = await supabase
             .from('cart_items')
             .select(`
                 *,  products:product_id (
@@ -95,7 +95,7 @@ router.get('/', authenticateToken, authorizeRole('buyer'), async (req, res) => {
 });
 
 // POST add item to cart
-router.post('/items', authenticateToken, authorizeRole('buyer'), validateCartItemData, validateUUID, async (req, res) => {
+router.post('/items', authenticateToken, authorizeRole('buyer'), validateCartItemData, async (req, res) => {
     try {
         const { userId } = req.user;
         const { product_id, quantity } = req.body;        // Check if product exists and is available
@@ -203,7 +203,7 @@ router.post('/items', authenticateToken, authorizeRole('buyer'), validateCartIte
 });
 
 // PUT update cart item quantity
-router.put('/items/:itemId', authenticateToken, authorizeRole('buyer'), validateUUID, async (req, res) => {
+router.put('/items/:itemId', authenticateToken, authorizeRole('buyer'), async (req, res) => {
     try {
         const { userId } = req.user;
         const { itemId } = req.params;
@@ -281,7 +281,7 @@ router.put('/items/:itemId', authenticateToken, authorizeRole('buyer'), validate
 });
 
 // DELETE remove item from cart
-router.delete('/items/:itemId', authenticateToken, authorizeRole('buyer'), validateUUID, async (req, res) => {
+router.delete('/items/:itemId', authenticateToken, authorizeRole('buyer'), async (req, res) => {
     try {
         const { userId } = req.user;
         const { itemId } = req.params;
