@@ -396,6 +396,72 @@ PUT /buyers/{userId}
 
 **Description:** Update buyer profile
 **Authentication:** Required (Own profile or Admin)
+**Request Body:**
+
+```json
+{
+  "delivery_address": "Updated delivery address",
+  "delivery_instructions": "Updated delivery instructions",
+  "preferred_payment_methods": ["credit_card", "promptpay", "mobile_banking"]
+}
+```
+
+**Note:** `preferred_payment_methods` should be an array of valid payment methods:
+
+- `cash_on_delivery`
+- `bank_transfer`
+- `mobile_banking`
+- `credit_card`
+- `promptpay`
+- `qr_code_payment`
+
+#### Get Available Payment Methods
+
+```http
+GET /buyers/config/payment-methods
+```
+
+**Description:** Get list of available payment methods with descriptions
+**Authentication:** None
+**Response:**
+
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "value": "cash_on_delivery",
+      "label": "Cash on Delivery",
+      "description": "Pay when your order is delivered"
+    },
+    {
+      "value": "bank_transfer",
+      "label": "Bank Transfer",
+      "description": "Direct bank transfer"
+    },
+    {
+      "value": "mobile_banking",
+      "label": "Mobile Banking",
+      "description": "Mobile banking app transfer"
+    },
+    {
+      "value": "credit_card",
+      "label": "Credit Card",
+      "description": "Credit or debit card payment"
+    },
+    {
+      "value": "promptpay",
+      "label": "PromptPay",
+      "description": "Thailand PromptPay instant payment"
+    },
+    {
+      "value": "qr_code_payment",
+      "label": "QR Code Payment",
+      "description": "Scan QR code to pay"
+    }
+  ]
+}
+```
 
 #### Get Buyer Statistics
 
@@ -405,6 +471,21 @@ GET /buyers/{userId}/stats
 
 **Description:** Get buyer order and spending statistics
 **Authentication:** Required (Own profile or Admin)
+**Response:**
+
+```json
+{
+  "success": true,
+  "data": {
+    "totalSpent": 450.5,
+    "totalOrders": 12,
+    "averageOrderValue": 37.54,
+    "hasDeliveryAddress": true,
+    "deliveryAddress": "123 Main St, City",
+    "preferredPaymentMethods": ["credit_card", "promptpay"]
+  }
+}
+```
 
 #### Get Top Buyers
 
@@ -570,7 +651,7 @@ POST /products
   "category": "vegetables",
   "quantity": 100,
   "unit": "kg",
-  "image_url": "https://example.com/tomato.jpg",
+  "image_url": "https://example.com/tomato.jpg"
 }
 ```
 
@@ -980,10 +1061,22 @@ GET /orders/stats/summary
   total_spent: "decimal",
   total_orders: "integer",
   delivery_address: "string (optional)",
+  delivery_instructions: "string (optional)",
+  preferred_payment_methods: "array of payment_method (optional)",
+  loyalty_points: "integer",
   created_at: "timestamp",
   updated_at: "timestamp"
 }
 ```
+
+**Available Payment Methods:**
+
+- `cash_on_delivery` - Cash on Delivery
+- `bank_transfer` - Bank Transfer
+- `mobile_banking` - Mobile Banking
+- `credit_card` - Credit Card
+- `promptpay` - PromptPay
+- `qr_code_payment` - QR Code Payment
 
 ### Product
 
@@ -1029,7 +1122,7 @@ GET /orders/stats/summary
   order_number: "string (unique)",
   total_amount: "decimal",
   delivery_address: "string",
-  payment_method: "cash_on_delivery | bank_transfer | gcash | paypal",
+  payment_method: "cash_on_delivery | bank_transfer | mobile_banking | credit_card | promptpay | qr_code_payment",
   payment_status: "pending | completed | failed | refunded",
   status: "pending | confirmed | preparing | ready_for_pickup | out_for_delivery | delivered | cancelled",
   notes: "string (optional)",

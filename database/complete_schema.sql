@@ -45,7 +45,7 @@ EXCEPTION
 END $$;
 
 DO $$ BEGIN
-    CREATE TYPE payment_method AS ENUM ('cash_on_delivery', 'bank_transfer', 'credit_card');
+    CREATE TYPE payment_method AS ENUM ('cash_on_delivery', 'bank_transfer', 'mobile_banking', 'credit_card', 'promptpay', 'qr_code_payment');
 EXCEPTION
     WHEN duplicate_object THEN null;
 END $$;
@@ -130,7 +130,7 @@ CREATE TABLE IF NOT EXISTS buyers (
     total_spent DECIMAL(12,2) DEFAULT 0.00,
     total_orders INTEGER DEFAULT 0,
     loyalty_points INTEGER DEFAULT 0,
-    preferred_payment_method payment_method,
+    preferred_payment_methods payment_method[],
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     UNIQUE(user_id)
@@ -235,6 +235,7 @@ CREATE INDEX IF NOT EXISTS idx_farmers_is_verified ON farmers(is_verified);
 
 -- Buyers table indexes
 CREATE INDEX IF NOT EXISTS idx_buyers_user_id ON buyers(user_id);
+CREATE INDEX IF NOT EXISTS idx_buyers_preferred_payment_methods ON buyers USING GIN (preferred_payment_methods);
 
 -- Products table indexes
 CREATE INDEX IF NOT EXISTS idx_products_farmer_id ON products(farmer_id);

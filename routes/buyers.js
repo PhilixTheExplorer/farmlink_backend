@@ -2,7 +2,7 @@ import express from 'express';
 import { supabase, dbConfig } from '../config/database.js';
 import { validateUUID, validatePagination } from '../middleware/validation.js';
 import { authenticateToken, authorizeRole, authorizeOwnerOrAdmin } from '../middleware/auth.js';
-import {checkDbConfig} from '../middleware/check_db_config.js';
+import { checkDbConfig } from '../middleware/check_db_config.js';
 
 const router = express.Router();
 
@@ -169,6 +169,38 @@ router.get('/user/:userId', validateUUID, async (req, res) => {
 router.put('/:userId', authenticateToken, authorizeOwnerOrAdmin, validateUUID, async (req, res) => {
     try {
         const { userId } = req.params;
+
+        // Validate preferred payment methods if provided
+        if (req.body.preferred_payment_methods) {
+            const validPaymentMethods = [
+                'cash_on_delivery',
+                'bank_transfer',
+                'mobile_banking',
+                'credit_card',
+                'promptpay',
+                'qr_code_payment'
+            ];
+
+            const providedMethods = req.body.preferred_payment_methods;
+
+            // Check if it's an array
+            if (!Array.isArray(providedMethods)) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'preferred_payment_methods must be an array'
+                });
+            }
+
+            // Check if all methods are valid
+            const invalidMethods = providedMethods.filter(method => !validPaymentMethods.includes(method));
+            if (invalidMethods.length > 0) {
+                return res.status(400).json({
+                    success: false,
+                    message: `Invalid payment methods: ${invalidMethods.join(', ')}. Valid methods are: ${validPaymentMethods.join(', ')}`
+                });
+            }
+        }
+
         const updateData = {
             ...req.body,
             updated_at: new Date().toISOString()
@@ -231,16 +263,15 @@ router.get('/:userId/stats', validateUUID, async (req, res) => {
                 });
             }
             throw buyerError;
-        }
-
-        // Calculate statistics
+        }        // Calculate statistics
         const stats = {
             totalSpent: parseFloat(buyer.total_spent),
             totalOrders: buyer.total_orders,
             averageOrderValue: buyer.total_orders > 0 ?
                 (parseFloat(buyer.total_spent) / buyer.total_orders) : 0,
             hasDeliveryAddress: !!buyer.delivery_address,
-            deliveryAddress: buyer.delivery_address
+            deliveryAddress: buyer.delivery_address,
+            preferredPaymentMethods: buyer.preferred_payment_methods || []
         };
 
         res.status(200).json({
@@ -288,6 +319,56 @@ router.get('/top/spenders', validatePagination, async (req, res) => {
         res.status(500).json({
             success: false,
             message: 'Error fetching top buyers',
+            error: error.message
+        });
+    }
+});
+
+// GET available payment methods
+router.get('/config/payment-methods', async (req, res) => {
+    try {
+        const paymentMethods = [
+            {
+                value: 'cash_on_delivery',
+                label: 'Cash on Delivery',
+                description: 'Pay when your order is delivered'
+            },
+            {
+                value: 'bank_transfer',
+                label: 'Bank Transfer',
+                description: 'Direct bank transfer'
+            },
+            {
+                value: 'mobile_banking',
+                label: 'Mobile Banking',
+                description: 'Mobile banking app transfer'
+            },
+            {
+                value: 'credit_card',
+                label: 'Credit Card',
+                description: 'Credit or debit card payment'
+            },
+            {
+                value: 'promptpay',
+                label: 'PromptPay',
+                description: 'Thailand PromptPay instant payment'
+            },
+            {
+                value: 'qr_code_payment',
+                label: 'QR Code Payment',
+                description: 'Scan QR code to pay'
+            }
+        ];
+
+        res.status(200).json({
+            success: true,
+            data: paymentMethods
+        });
+    } catch (error) {
+        console.error('Error fetching payment methods:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Error fetching payment methods',
             error: error.message
         });
     }
