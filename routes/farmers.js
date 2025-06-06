@@ -2,7 +2,7 @@ import express from 'express';
 import { supabase, dbConfig } from '../config/database.js';
 import { validateUUID, validatePagination } from '../middleware/validation.js';
 import { authenticateToken, authorizeRole, authorizeOwnerOrAdmin } from '../middleware/auth.js';
-import {checkDbConfig} from '../middleware/check_db_config.js';
+import { checkDbConfig } from '../middleware/check_db_config.js';
 
 const router = express.Router();
 
@@ -150,37 +150,115 @@ router.get('/user/:userId', validateUUID, async (req, res) => {
 router.put('/:userId', authenticateToken, authorizeOwnerOrAdmin, validateUUID, async (req, res) => {
     try {
         const { userId } = req.params;
-        const updateData = {
-            ...req.body,
-            updated_at: new Date().toISOString()
-        };
 
-        // Remove fields that shouldn't be updated
-        delete updateData.id;
-        delete updateData.user_id;
-        delete updateData.created_at;
+        // Separate farmer-specific fields from user fields
+        const farmerFields = [
+            'farm_name',
+            'farm_address',
+            'farm_description',
+            'established_year',
+            'total_sales',
+            'is_verified'
+        ];
 
-        const { data, error } = await supabase
+        const userFields = [
+            'name',
+            'phone',
+            'location',
+            'profile_image_url'
+        ];
+
+        // Extract farmer-specific data
+        const farmerUpdateData = {};
+        const userUpdateData = {};
+
+        Object.keys(req.body).forEach(key => {
+            // Handle description field mapping
+            if (key === 'description') {
+                farmerUpdateData.farm_description = req.body[key];
+            } else if (farmerFields.includes(key)) {
+                farmerUpdateData[key] = req.body[key];
+            } else if (userFields.includes(key)) {
+                userUpdateData[key] = req.body[key];
+            }
+            // Ignore any other fields
+        });
+
+        // Always update the timestamp for farmer
+        farmerUpdateData.updated_at = new Date().toISOString();
+
+        let updatedFarmerData = null;
+        let updatedUserData = null;
+
+        // Update farmer data if there are farmer-specific fields
+        if (Object.keys(farmerUpdateData).length > 1) { // More than just updated_at
+            const { data: farmerData, error: farmerError } = await supabase
+                .from('farmers')
+                .update(farmerUpdateData)
+                .eq('user_id', userId)
+                .select()
+                .single();
+
+            if (farmerError) {
+                if (farmerError.code === 'PGRST116') {
+                    return res.status(404).json({
+                        success: false,
+                        message: 'Farmer profile not found'
+                    });
+                }
+                throw farmerError;
+            }
+            updatedFarmerData = farmerData;
+        }
+
+        // Update user data if there are user-specific fields
+        if (Object.keys(userUpdateData).length > 0) {
+            userUpdateData.updated_at = new Date().toISOString();
+
+            const { data: userData, error: userError } = await supabase
+                .from('users')
+                .update(userUpdateData)
+                .eq('id', userId)
+                .select()
+                .single();
+
+            if (userError) {
+                throw userError;
+            }
+            updatedUserData = userData;
+        }
+
+        // Get the complete updated farmer profile with user information
+        const { data: finalData, error: finalError } = await supabase
             .from('farmers')
-            .update(updateData)
+            .select(`
+                *,
+                users!farmers_user_id_fkey (
+                    id,
+                    email,
+                    name,
+                    phone,
+                    location,
+                    profile_image_url
+                )
+            `)
             .eq('user_id', userId)
-            .select()
             .single();
 
-        if (error) {
-            if (error.code === 'PGRST116') {
+        if (finalError) {
+            if (finalError.code === 'PGRST116') {
                 return res.status(404).json({
                     success: false,
                     message: 'Farmer profile not found'
                 });
             }
-            throw error;
+            throw finalError;
         }
 
         res.status(200).json({
             success: true,
             message: 'Farmer profile updated successfully',
-            data: data
+            data: finalData
         });
     } catch (error) {
         console.error('Error updating farmer profile:', error);

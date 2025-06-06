@@ -199,39 +199,107 @@ router.put('/:userId', authenticateToken, authorizeOwnerOrAdmin, validateUUID, a
                     message: `Invalid payment methods: ${invalidMethods.join(', ')}. Valid methods are: ${validPaymentMethods.join(', ')}`
                 });
             }
+        }        // Separate buyer-specific fields from user fields
+        const buyerFields = [
+            'delivery_address',
+            'delivery_instructions',
+            'preferred_payment_methods',
+            'loyalty_points'
+        ];
+
+        const userFields = [
+            'name',
+            'phone',
+            'location',
+            'profile_image_url'
+        ];
+
+        // Extract buyer-specific data
+        const buyerUpdateData = {};
+        const userUpdateData = {};
+
+        Object.keys(req.body).forEach(key => {
+            if (buyerFields.includes(key)) {
+                buyerUpdateData[key] = req.body[key];
+            } else if (userFields.includes(key)) {
+                userUpdateData[key] = req.body[key];
+            }
+            // Ignore any other fields
+        });
+
+        // Always update the timestamp for buyer
+        buyerUpdateData.updated_at = new Date().toISOString();
+
+        let updatedBuyerData = null;
+        let updatedUserData = null;
+
+        // Update buyer data if there are buyer-specific fields
+        if (Object.keys(buyerUpdateData).length > 1) { // More than just updated_at
+            const { data: buyerData, error: buyerError } = await supabase
+                .from('buyers')
+                .update(buyerUpdateData)
+                .eq('user_id', userId)
+                .select()
+                .single();
+
+            if (buyerError) {
+                if (buyerError.code === 'PGRST116') {
+                    return res.status(404).json({
+                        success: false,
+                        message: 'Buyer profile not found'
+                    });
+                }
+                throw buyerError;
+            }
+            updatedBuyerData = buyerData;
         }
 
-        const updateData = {
-            ...req.body,
-            updated_at: new Date().toISOString()
-        };
+        // Update user data if there are user-specific fields
+        if (Object.keys(userUpdateData).length > 0) {
+            userUpdateData.updated_at = new Date().toISOString();
 
-        // Remove fields that shouldn't be updated
-        delete updateData.id;
-        delete updateData.user_id;
-        delete updateData.created_at;
+            const { data: userData, error: userError } = await supabase
+                .from('users')
+                .update(userUpdateData)
+                .eq('id', userId)
+                .select()
+                .single();
 
-        const { data, error } = await supabase
+            if (userError) {
+                throw userError;
+            }
+            updatedUserData = userData;
+        }
+
+        // Get the complete updated buyer profile with user information
+        const { data: finalData, error: finalError } = await supabase
             .from('buyers')
-            .update(updateData)
+            .select(`
+                *,
+                users!buyers_user_id_fkey (
+                    id,
+                    email,
+                    name,
+                    phone,
+                    location,
+                    profile_image_url
+                )
+            `)
             .eq('user_id', userId)
-            .select()
             .single();
 
-        if (error) {
-            if (error.code === 'PGRST116') {
+        if (finalError) {
+            if (finalError.code === 'PGRST116') {
                 return res.status(404).json({
                     success: false,
                     message: 'Buyer profile not found'
                 });
             }
-            throw error;
-        }
-
-        res.status(200).json({
+            throw finalError;
+        } res.status(200).json({
             success: true,
             message: 'Buyer profile updated successfully',
-            data: data
+            data: finalData
         });
     } catch (error) {
         console.error('Error updating buyer profile:', error);
